@@ -10,7 +10,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<GoalType> GoalTypes { get; set; }
 
     public DbSet<Goal.Goal> Goals { get; set; }
-    
+
+    public DbSet<Product.Product> Products { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         
@@ -117,6 +119,40 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             
             goal.Property(g => g.Id)
                 .HasDefaultValueSql("gen_random_uuid()");
+        });
+
+        modelBuilder.Entity<Product.Product>(product =>
+        {
+            // Id
+
+            product.HasIndex(p => p.Id)
+                .IsUnique();
+
+            product.Property(p => p.Id)
+                .HasDefaultValueSql("gen_random_uuid()");
+            
+            // Creation Date
+            
+            product.Property(u => u.CreationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<Diet.Diet>(diet =>
+        {
+            // Id
+
+            diet.HasIndex(p => p.Id)
+                .IsUnique();
+
+            diet.Property(p => p.Id)
+                .HasDefaultValueSql("gen_random_uuid()");
+            
+            // Creation Date
+            
+            diet.Property(u => u.CreationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAdd();
         });
     }
 }

@@ -99,7 +99,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger()
         .UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "TrackFit V1");
             // Добавьте конфигурацию OAuth
             c.OAuthClientId("swagger-ui");
             c.OAuthAppName("Swagger UI");
