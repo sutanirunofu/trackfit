@@ -12,6 +12,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Goal.Goal> Goals { get; set; }
 
     public DbSet<Product.Product> Products { get; set; }
+    
+    public DbSet<Diet.Diet> Diets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
