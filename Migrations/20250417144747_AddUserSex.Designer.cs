@@ -3,6 +3,7 @@ using System;
 using Fitness;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fitness.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250417144747_AddUserSex")]
+    partial class AddUserSex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,9 +146,6 @@ namespace Fitness.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<string>("Avatar")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("Birthday")
                         .HasColumnType("timestamp with time zone");
 
@@ -216,7 +216,7 @@ namespace Fitness.Migrations
                         .IsRequired();
 
                     b.HasOne("Fitness.User.User", "User")
-                        .WithMany("Diets")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -246,11 +246,6 @@ namespace Fitness.Migrations
                         .IsRequired();
 
                     b.Navigation("Goal");
-                });
-
-            modelBuilder.Entity("Fitness.User.User", b =>
-                {
-                    b.Navigation("Diets");
                 });
 #pragma warning restore 612, 618
         }

@@ -53,9 +53,11 @@ public class UserController(AppDbContext context) : ControllerBase
 
         user.Username = updateUserModel.Username ?? user.Username;
         user.FirstName = updateUserModel.FirstName ?? user.FirstName;
+        user.Sex = updateUserModel.Sex ?? user.Sex;
         user.Birthday = updateUserModel.Birthday?.ToUniversalTime().AddDays(1).AddHours(-21) ?? user.Birthday;
         user.Height = updateUserModel.Height ?? user.Height;
         user.Weight = updateUserModel.Weight ?? user.Weight;
+        user.Avatar = updateUserModel.Avatar ?? user.Avatar;
         user.ModificationDate = DateTime.UtcNow;
 
         userGoal.Type = userGoalType ?? userGoal.Type;

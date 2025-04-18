@@ -1,8 +1,10 @@
+using System.IO.Compression;
 using System.Security.Claims;
 using System.Text;
 using Fitness;
 using Fitness.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -47,6 +49,30 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAuthorization();
 builder.Services.AddMvc(options => options.EnableEndpointRouting = false);
 
+// Добавляем службу сжатия
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.MimeTypes =
+    [
+        "text/plain",
+        "text/css",
+        "application/javascript",
+        "text/html",
+        "application/xml",
+        "text/xml",
+        "application/json",
+        "text/json",
+        "image/svg+xml"
+    ];
+    options.Providers.Add<GzipCompressionProvider>();
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(options => 
+{
+    options.Level = CompressionLevel.SmallestSize;
+});
+
 // Добавление зависимостей в контекст
 builder.Services.AddScoped<JwtUtil>();
 
@@ -90,6 +116,7 @@ builder.Services.AddControllers()
 
 var app = builder.Build();
 
+app.UseResponseCompression();
 app.UseAuthentication();
 app.UseAuthorization();
 

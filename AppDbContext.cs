@@ -85,6 +85,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .WithOne()
                 .HasForeignKey<User.User>(u => u.GoalId);
             
+            // Diets
+            
+            modelBuilder.Entity<User.User>()
+                .HasMany(u => u.Diets)
+                .WithOne(d => d.User)
+                .HasForeignKey(d => d.UserId);
+            
             // Registration and Modification Date
             
             user.Property(u => u.RegistrationDate)

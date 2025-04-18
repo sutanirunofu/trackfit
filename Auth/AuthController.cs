@@ -45,12 +45,13 @@ public class AuthController(AppDbContext context, JwtUtil jwtUtil) : ControllerB
                 Username = registerModel.Username,
                 Password = BCrypt.Net.BCrypt.HashPassword(registerModel.Password),
                 FirstName = registerModel.FirstName,
+                Sex = registerModel.Sex,
                 Birthday = registerModel.Birthday.Kind == DateTimeKind.Unspecified
                     ? DateTime.SpecifyKind(registerModel.Birthday, DateTimeKind.Utc)
                     : registerModel.Birthday.ToUniversalTime(),
                 Height = registerModel.Height,
                 Weight = registerModel.Weight,
-                Goal = userGoal
+                Goal = userGoal,
             };
             context.Users.Add(user);
             
@@ -96,7 +97,9 @@ public class AuthController(AppDbContext context, JwtUtil jwtUtil) : ControllerB
 
         var user = await context.Users
             .Include(u => u.Goal)
-            .Include(u => u.Goal.Type)
+            .ThenInclude(g => g.Type)
+            .Include(u => u.Diets)
+            .ThenInclude(d => d.Product)
             .FirstOrDefaultAsync(u => u.Id.Equals(Guid.Parse(userId)));
 
         if (user == null)

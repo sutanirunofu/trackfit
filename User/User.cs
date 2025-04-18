@@ -13,6 +13,8 @@ public class User
     
     public string FirstName { get; set; }
 
+    public UserSex Sex { get; set; }
+
     public DateTime Birthday { get; set; }
 
     public int Height { get; set; }
@@ -22,6 +24,10 @@ public class User
     public Goal.Goal Goal { get; set; }
     
     public Guid GoalId { get; set; }
+
+    public string? Avatar { get; set; }
+    
+    public List<Diet.Diet> Diets { get; set; }
 
     public DateTime RegistrationDate { get; set; }
     
