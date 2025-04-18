@@ -73,14 +73,14 @@ public class AuthController(AppDbContext context, JwtUtil jwtUtil) : ControllerB
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest(new { Message = "Некорректные данные" });
         }
 
         var user = await context.Users
             .FirstOrDefaultAsync(u => u.Username.Equals(loginModel.Username));
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(loginModel.Password, user.Password))
-            return Unauthorized(new { Message = "Некорректные данные" });
+            return BadRequest(new { Message = "Некорректные данные" });
 
         var token = jwtUtil.GenerateJwtToken(user);
         return Ok(new { Token = token });

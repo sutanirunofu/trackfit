@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,7 @@ public class DietController(AppDbContext context) : ControllerBase
     }
 
     // Получить запись диеты по ID
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetDietById(Guid id)
     {
         var diet = await context.Diets
@@ -39,16 +40,50 @@ public class DietController(AppDbContext context) : ControllerBase
 
     // Создать новую запись диеты
     [HttpPost]
-    public async Task<IActionResult> CreateDiet([FromBody] Diet diet)
+    public async Task<IActionResult> CreateDiet([FromBody] CreateDietModel createDietModel)
     {
+        Console.WriteLine(createDietModel.Type);
+        Console.WriteLine(createDietModel.ProductId);
+        Console.WriteLine(createDietModel.Weight);
+        
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-
-        diet.Id = Guid.NewGuid();
-        diet.CreationDate = DateTime.UtcNow;
         
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (userId == null)
+        {
+            return BadRequest();
+        }
+        
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id.Equals(Guid.Parse(userId)));
+        
+        if (user == null)
+        {
+            return BadRequest();
+        }
+        
+        var product = await context.Products.FirstOrDefaultAsync(p => p.Id.Equals(createDietModel.ProductId));
+
+        Console.WriteLine(product);
+        
+        if (product == null)
+        {
+            return BadRequest();
+        }
+        
+        var diet = new Diet
+        {
+            Id = Guid.NewGuid(),
+            Type = (DietType.DietType) createDietModel.Type,
+            User = user,
+            Product = product,
+            Weight = createDietModel.Weight,
+            CreationDate = DateTime.UtcNow
+        };
+
         context.Diets.Add(diet);
         await context.SaveChangesAsync();
         
@@ -59,7 +94,7 @@ public class DietController(AppDbContext context) : ControllerBase
     }
 
     // Обновить запись диеты
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateDiet(Guid id, [FromBody] Diet diet)
     {
         if (id != diet.Id)
@@ -94,7 +129,7 @@ public class DietController(AppDbContext context) : ControllerBase
     }
 
     // Удалить запись диеты
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteDiet(Guid id)
     {
         var diet = await context.Diets.FindAsync(id);
