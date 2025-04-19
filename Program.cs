@@ -11,6 +11,12 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(8080);    // HTTP
+    serverOptions.ListenAnyIP(8081);    // HTTPS
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -68,7 +74,7 @@ builder.Services.AddResponseCompression(options =>
     options.Providers.Add<GzipCompressionProvider>();
 });
 
-builder.Services.Configure<GzipCompressionProviderOptions>(options => 
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 {
     options.Level = CompressionLevel.SmallestSize;
 });
@@ -95,7 +101,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"])),
-            
+
             // Дополнительные рекомендации
             NameClaimType = ClaimTypes.Name,
             RoleClaimType = ClaimTypes.Role
@@ -105,7 +111,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
-        builder => builder.WithOrigins("https://localhost:4200", "http://localhost:4200", "https://127.0.0.1:4200", "http://127.0.0.1:4200")
+        builder => builder.WithOrigins("http://localhost", "https://localhost", "https://localhost:4200", "http://localhost:4200",
+                "https://127.0.0.1:4200",
+                "http://127.0.0.1:4200")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());
