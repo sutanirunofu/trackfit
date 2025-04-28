@@ -42,10 +42,6 @@ public class DietController(AppDbContext context) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateDiet([FromBody] CreateDietModel createDietModel)
     {
-        Console.WriteLine(createDietModel.Type);
-        Console.WriteLine(createDietModel.ProductId);
-        Console.WriteLine(createDietModel.Weight);
-        
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -66,8 +62,6 @@ public class DietController(AppDbContext context) : ControllerBase
         }
         
         var product = await context.Products.FirstOrDefaultAsync(p => p.Id.Equals(createDietModel.ProductId));
-
-        Console.WriteLine(product);
         
         if (product == null)
         {

@@ -100,6 +100,7 @@ public class AuthController(AppDbContext context, JwtUtil jwtUtil) : ControllerB
             .ThenInclude(g => g.Type)
             .Include(u => u.Diets)
             .ThenInclude(d => d.Product)
+            .Include(u => u.WaterDiets)
             .FirstOrDefaultAsync(u => u.Id.Equals(Guid.Parse(userId)));
 
         if (user == null)

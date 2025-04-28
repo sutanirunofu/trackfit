@@ -12,22 +12,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Goal.Goal> Goals { get; set; }
 
     public DbSet<Product.Product> Products { get; set; }
-    
+
     public DbSet<Diet.Diet> Diets { get; set; }
+
+    public DbSet<WaterDiet.WaterDiet> WaterDiet { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        
         modelBuilder.Entity<User.User>(user =>
         {
             // Id
-            
+
             user.HasIndex(u => u.Id)
                 .IsUnique();
-            
+
             user.Property(p => p.Id)
                 .HasDefaultValueSql("gen_random_uuid()");
-            
+
             // Username
 
             user.HasIndex(u => u.Username)
@@ -41,20 +42,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 "CH_User_Username_MinLength",
                 "LENGTH(\"Username\") >= 4"
             );
-            
+
             // Password
-            
+
             user.Property(u => u.Password)
                 .IsRequired()
                 .HasMaxLength(100);
-            
+
             user.HasCheckConstraint(
                 "CH_User_Password_MinLength",
                 "LENGTH(\"Password\") >= 8"
             );
-            
+
             // FirstName
-            
+
             user.HasCheckConstraint(
                 "CH_User_FirstName_MinLength",
                 "LENGTH(\"FirstName\") >= 1"
@@ -62,38 +63,45 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
             user.Property(u => u.FirstName)
                 .HasMaxLength(100);
-            
+
             // Birthday
 
             user.Property(u => u.Birthday)
                 .IsRequired();
-                
+
             // Height
-            
+
             user.Property(u => u.Height)
                 .IsRequired();
-            
+
             // Weight
 
             user.Property(u => u.Weight)
                 .IsRequired();
-            
+
             // Goal
-            
+
             modelBuilder.Entity<User.User>()
                 .HasOne(u => u.Goal)
                 .WithOne()
                 .HasForeignKey<User.User>(u => u.GoalId);
-            
+
             // Diets
-            
+
             modelBuilder.Entity<User.User>()
                 .HasMany(u => u.Diets)
                 .WithOne(d => d.User)
                 .HasForeignKey(d => d.UserId);
             
+            // Water Diets
+
+            modelBuilder.Entity<User.User>()
+                .HasMany(u => u.WaterDiets)
+                .WithOne(w => w.User)
+                .HasForeignKey(w => w.UserId);
+
             // Registration and Modification Date
-            
+
             user.Property(u => u.RegistrationDate)
                 .HasDefaultValueSql("now()")
                 .ValueGeneratedOnAdd();
@@ -102,17 +110,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasDefaultValueSql("now()")
                 .ValueGeneratedOnAddOrUpdate();
         });
-        
+
         modelBuilder.Entity<GoalType>(goalType =>
         {
             // Id
-            
+
             goalType.HasIndex(gt => gt.Id)
                 .IsUnique();
-            
+
             goalType.Property(gt => gt.Id)
                 .HasDefaultValueSql("gen_random_uuid()");
-            
+
             // Name
 
             goalType.HasIndex(gt => gt.Name)
@@ -122,10 +130,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Goal.Goal>(goal =>
         {
             // Id
-            
+
             goal.HasIndex(g => g.Id)
                 .IsUnique();
-            
+
             goal.Property(g => g.Id)
                 .HasDefaultValueSql("gen_random_uuid()");
         });
@@ -139,9 +147,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
             product.Property(p => p.Id)
                 .HasDefaultValueSql("gen_random_uuid()");
-            
+
             // Creation Date
-            
+
             product.Property(u => u.CreationDate)
                 .HasDefaultValueSql("now()")
                 .ValueGeneratedOnAdd();
@@ -156,10 +164,27 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
             diet.Property(p => p.Id)
                 .HasDefaultValueSql("gen_random_uuid()");
-            
+
             // Creation Date
-            
+
             diet.Property(u => u.CreationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<WaterDiet.WaterDiet>(wd =>
+        {
+            // Id
+
+            wd.HasIndex(p => p.Id)
+                .IsUnique();
+
+            wd.Property(p => p.Id)
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            // Creation Date
+
+            wd.Property(u => u.CreationDate)
                 .HasDefaultValueSql("now()")
                 .ValueGeneratedOnAdd();
         });
