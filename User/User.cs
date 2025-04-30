@@ -31,6 +31,8 @@ public class User
 
     public List<WaterDiet.WaterDiet> WaterDiets { get; set; }
 
+    public List<Product.Product> Products { get; set; }
+
     public DateTime RegistrationDate { get; set; }
     
     public DateTime ModificationDate { get; set; }

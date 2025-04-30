@@ -26,7 +26,7 @@ public class UpdateUserModel
     
     // Goal
 
-    public string? GoalType { get; set; }
+    public string? GoalTypeName { get; set; }
     
     [Range(10, 500, ErrorMessage = "Вес может быть от 10 до 500 килограммов")]
     public int? GoalWeight { get; set; }
