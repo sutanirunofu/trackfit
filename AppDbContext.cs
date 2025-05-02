@@ -17,6 +17,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<WaterDiet.WaterDiet> WaterDiet { get; set; }
 
+    public DbSet<Recipe.Recipe> Recipes { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User.User>(user =>
@@ -187,6 +189,27 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             wd.Property(u => u.CreationDate)
                 .HasDefaultValueSql("now()")
                 .ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<Recipe.Recipe>(r =>
+        {
+            // Id
+
+            r.HasIndex(p => p.Id)
+                .IsUnique();
+
+            r.Property(p => p.Id)
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            // Creation And Modification Date
+
+            r.Property(u => u.CreationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAdd();
+            
+            r.Property(u => u.ModificationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAddOrUpdate();
         });
     }
 }

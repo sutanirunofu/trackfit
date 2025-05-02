@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,7 @@ public class ProductController(AppDbContext context) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> CreateProduct([FromBody] Product product)
     {
         if (!ModelState.IsValid)
@@ -48,6 +50,7 @@ public class ProductController(AppDbContext context) : ControllerBase
     }
     
     [HttpPut("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] Product product)
     {
         if (id != product.Id)
@@ -81,6 +84,7 @@ public class ProductController(AppDbContext context) : ControllerBase
 
     // Удалить продукт
     [HttpDelete("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> DeleteProduct(Guid id)
     {
         var product = await context.Products.FindAsync(id);
