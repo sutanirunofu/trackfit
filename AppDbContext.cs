@@ -19,6 +19,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<Recipe.Recipe> Recipes { get; set; }
 
+    public DbSet<Notification.Notification> Notifications { get; set; }
+
+    public DbSet<Training.Training> Trainings { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User.User>(user =>
@@ -208,6 +212,44 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .ValueGeneratedOnAdd();
             
             r.Property(u => u.ModificationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAddOrUpdate();
+        });
+        
+        modelBuilder.Entity<Notification.Notification>(n =>
+        {
+            // Id
+
+            n.HasIndex(p => p.Id)
+                .IsUnique();
+
+            n.Property(p => p.Id)
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            // Creation Date
+
+            n.Property(u => u.CreationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAdd();
+        });
+        
+        modelBuilder.Entity<Training.Training>(t =>
+        {
+            // Id
+
+            t.HasIndex(p => p.Id)
+                .IsUnique();
+
+            t.Property(p => p.Id)
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            // Creation And Modification Date
+
+            t.Property(u => u.CreationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAdd();
+            
+            t.Property(u => u.ModificationDate)
                 .HasDefaultValueSql("now()")
                 .ValueGeneratedOnAddOrUpdate();
         });

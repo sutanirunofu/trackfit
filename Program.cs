@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Security.Claims;
 using System.Text;
 using Fitness;
+using Fitness.Notification;
 using Fitness.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -19,6 +20,8 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddHostedService<NotificationBackgroundService>();
 
 builder.Services.AddSwaggerGen(c =>
 {

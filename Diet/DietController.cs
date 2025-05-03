@@ -10,6 +10,11 @@ namespace Fitness.Diet;
 [EnableCors("AllowAngular")]
 public class DietController(AppDbContext context) : ControllerBase
 {
+    private bool DietExists(Guid id)
+    {
+        return context.Diets.Any(e => e.Id == id);
+    }
+
     // Получить все записи диеты
     [HttpGet]
     public async Task<IActionResult> GetAllDiets()
@@ -136,10 +141,5 @@ public class DietController(AppDbContext context) : ControllerBase
         await context.SaveChangesAsync();
 
         return NoContent();
-    }
-
-    private bool DietExists(Guid id)
-    {
-        return context.Diets.Any(e => e.Id == id);
     }
 }
