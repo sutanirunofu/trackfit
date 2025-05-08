@@ -22,6 +22,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Notification.Notification> Notifications { get; set; }
 
     public DbSet<Training.Training> Trainings { get; set; }
+    
+    public DbSet<UserWeight.UserWeight> UserWeights { get; set; }
+    
+    public DbSet<Sleep.Sleep> Sleeps { get; set; }
+    
+    public DbSet<Achievement.Achievement> Achievements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -80,11 +86,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             user.Property(u => u.Height)
                 .IsRequired();
 
-            // Weight
-
-            user.Property(u => u.Weight)
-                .IsRequired();
-
             // Goal
 
             modelBuilder.Entity<User.User>()
@@ -92,6 +93,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .WithOne()
                 .HasForeignKey<User.User>(u => u.GoalId);
 
+            // Weights
+            
+            modelBuilder.Entity<User.User>()
+                .HasMany(u => u.Weights)
+                .WithOne(uw => uw.User)
+                .HasForeignKey(uw => uw.UserId);
+            
             // Diets
 
             modelBuilder.Entity<User.User>()
@@ -105,6 +113,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasMany(u => u.WaterDiets)
                 .WithOne(w => w.User)
                 .HasForeignKey(w => w.UserId);
+            
+            // Water Diets
+
+            modelBuilder.Entity<User.User>()
+                .HasMany(u => u.Sleeps)
+                .WithOne(s => s.User)
+                .HasForeignKey(s => s.UserId);
 
             // Registration and Modification Date
 
@@ -115,6 +130,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             user.Property(u => u.ModificationDate)
                 .HasDefaultValueSql("now()")
                 .ValueGeneratedOnAddOrUpdate();
+            
+            // Achievement
+
+            modelBuilder.Entity<User.User>()
+                .HasMany(u => u.Achievements)
+                .WithMany(a => a.Users);
+
+
         });
 
         modelBuilder.Entity<GoalType>(goalType =>
@@ -250,6 +273,48 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .ValueGeneratedOnAdd();
             
             t.Property(u => u.ModificationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAddOrUpdate();
+        });
+        
+        modelBuilder.Entity<Sleep.Sleep>(s =>
+        {
+            // Id
+
+            s.HasIndex(p => p.Id)
+                .IsUnique();
+
+            s.Property(p => p.Id)
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            // Creation And Modification Date
+
+            s.Property(u => u.CreationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAdd();
+            
+            s.Property(u => u.ModificationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAddOrUpdate();
+        });
+        
+        modelBuilder.Entity<Achievement.Achievement>(achievement =>
+        {
+            // Id
+
+            achievement.HasIndex(a => a.Id)
+                .IsUnique();
+
+            achievement.Property(a => a.Id)
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            // Creation And Modification Date
+
+            achievement.Property(a => a.CreationDate)
+                .HasDefaultValueSql("now()")
+                .ValueGeneratedOnAdd();
+            
+            achievement.Property(a => a.ModificationDate)
                 .HasDefaultValueSql("now()")
                 .ValueGeneratedOnAddOrUpdate();
         });

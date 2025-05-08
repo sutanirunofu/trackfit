@@ -3,6 +3,7 @@ using System;
 using Fitness;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Fitness.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250506150023_AddSleep")]
+    partial class AddSleep
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,62 +24,6 @@ namespace Fitness.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("AchievementUser", b =>
-                {
-                    b.Property<Guid>("AchievementsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("AchievementsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("AchievementUser");
-                });
-
-            modelBuilder.Entity("Fitness.Achievement.Achievement", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("CreationDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ModificationDate")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Symbol")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Id")
-                        .IsUnique();
-
-                    b.ToTable("Achievements");
-                });
 
             modelBuilder.Entity("Fitness.Diet.Diet", b =>
                 {
@@ -465,21 +412,6 @@ namespace Fitness.Migrations
                     b.ToTable("WaterDiet");
                 });
 
-            modelBuilder.Entity("AchievementUser", b =>
-                {
-                    b.HasOne("Fitness.Achievement.Achievement", null)
-                        .WithMany()
-                        .HasForeignKey("AchievementsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Fitness.User.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Fitness.Diet.Diet", b =>
                 {
                     b.HasOne("Fitness.Product.Product", "Product")
@@ -531,7 +463,7 @@ namespace Fitness.Migrations
             modelBuilder.Entity("Fitness.Sleep.Sleep", b =>
                 {
                     b.HasOne("Fitness.User.User", "User")
-                        .WithMany("Sleeps")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -588,8 +520,6 @@ namespace Fitness.Migrations
                     b.Navigation("Diets");
 
                     b.Navigation("Products");
-
-                    b.Navigation("Sleeps");
 
                     b.Navigation("WaterDiets");
 

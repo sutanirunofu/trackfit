@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Security.Claims;
 using Fitness.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -15,6 +16,7 @@ public class AuthController(AppDbContext context, JwtUtil jwtUtil) : ControllerB
     [HttpPost("Register")]
     public async Task<IActionResult> Register([FromBody] RegisterModel registerModel)
     {
+        Console.WriteLine(registerModel);
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
@@ -50,9 +52,19 @@ public class AuthController(AppDbContext context, JwtUtil jwtUtil) : ControllerB
                     ? DateTime.SpecifyKind(registerModel.Birthday, DateTimeKind.Utc)
                     : registerModel.Birthday.ToUniversalTime(),
                 Height = registerModel.Height,
-                Weight = registerModel.Weight,
                 Goal = userGoal,
             };
+
+            var userWeight = new UserWeight.UserWeight
+            {
+                User = user,
+                Weight = registerModel.Weight
+            };
+
+            context.UserWeights.Add(userWeight);
+            
+            user.Weights.Add(userWeight);
+            
             context.Users.Add(user);
             
             await context.SaveChangesAsync();
@@ -63,6 +75,7 @@ public class AuthController(AppDbContext context, JwtUtil jwtUtil) : ControllerB
         }
         catch (Exception ex)
         {
+            Console.WriteLine(ex);
             await transaction.RollbackAsync();
             return StatusCode(StatusCodes.Status500InternalServerError, "Ошибка при регистрации");
         }
@@ -98,10 +111,12 @@ public class AuthController(AppDbContext context, JwtUtil jwtUtil) : ControllerB
         var user = await context.Users
             .Include(u => u.Goal)
             .ThenInclude(g => g.Type)
-            .Include(u => u.Diets)
+            .Include(u => u.Diets.OrderByDescending(d => d.CreationDate))
             .ThenInclude(d => d.Product)
-            .Include(u => u.WaterDiets)
-            .Include(u => u.Products)
+            .Include(u => u.WaterDiets.OrderByDescending(d => d.CreationDate))
+            .Include(u => u.Products.OrderByDescending(p => p.CreationDate))
+            .Include(u => u.Weights.OrderBy(w => w.CreationDate))
+            .Include(u => u.Achievements)
             .FirstOrDefaultAsync(u => u.Id.Equals(Guid.Parse(userId)));
 
         if (user == null)

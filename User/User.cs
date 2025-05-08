@@ -19,7 +19,7 @@ public class User
 
     public int Height { get; set; }
 
-    public int Weight { get; set; }
+    public List<UserWeight.UserWeight> Weights { get; set; }
 
     public Goal.Goal Goal { get; set; }
     
@@ -50,4 +50,9 @@ public class User
             return age;
         }
     }
+    
+    public List<Achievement.Achievement> Achievements { get; set; }
+
+    [JsonIgnore]
+    public List<Sleep.Sleep> Sleeps { get; set; }
 }

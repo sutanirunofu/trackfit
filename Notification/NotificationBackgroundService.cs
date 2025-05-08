@@ -4,6 +4,8 @@ namespace Fitness.Notification;
 
 public class NotificationBackgroundService(IServiceScopeFactory scopeFactory) : BackgroundService
 {
+    private readonly TimeSpan DELAY = TimeSpan.FromMinutes(5);
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
@@ -14,7 +16,7 @@ public class NotificationBackgroundService(IServiceScopeFactory scopeFactory) : 
                 await CheckForNotifications(context);
             }
 
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+            await Task.Delay(DELAY, stoppingToken);
         }
     }
 
@@ -23,7 +25,7 @@ public class NotificationBackgroundService(IServiceScopeFactory scopeFactory) : 
         try
         {
             var users = await context.Users
-                .Include(u => u.WaterDiets)
+                .Include(u => u.WaterDiets).Include(user => user.Weights)
                 .ToListAsync();
 
             foreach (var user in users)
@@ -31,7 +33,7 @@ public class NotificationBackgroundService(IServiceScopeFactory scopeFactory) : 
                 var waterDiets = user.WaterDiets.Where(wd => wd.CreationDate.Day == DateTime.UtcNow.Day &&
                                                              wd.CreationDate.Month == DateTime.UtcNow.Month &&
                                                              wd.CreationDate.Year == DateTime.UtcNow.Year);
-                var normal = user.Weight * 35;
+                var normal = user.Weights.Last().Weight * 35;
                 var total = waterDiets.Sum(water => water.Count);
 
                 if (total >= normal) continue;

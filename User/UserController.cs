@@ -25,10 +25,13 @@ public class UserController(AppDbContext context) : ControllerBase
 
         var user = await context.Users
             .Include(u => u.Goal)
-            .Include(u => u.Goal.Type)
-            .Include(u => u.Diets)
-            .Include(u => u.WaterDiets)
-            .Include(u => u.Products)
+            .ThenInclude(g => g.Type)
+            .Include(u => u.Diets.OrderByDescending(d => d.CreationDate))
+            .ThenInclude(d => d.Product)
+            .Include(u => u.WaterDiets.OrderByDescending(d => d.CreationDate))
+            .Include(u => u.Products.OrderByDescending(p => p.CreationDate))
+            .Include(u => u.Weights.OrderByDescending(w => w.CreationDate))
+            .Include(u => u.Achievements)
             .FirstOrDefaultAsync(u => u.Id.Equals(Guid.Parse(userId)));
 
         if (user == null)
@@ -52,16 +55,42 @@ public class UserController(AppDbContext context) : ControllerBase
         user.Sex = updateUserModel.Sex ?? user.Sex;
         user.Birthday = updateUserModel.Birthday?.ToUniversalTime().AddDays(1).AddHours(-21) ?? user.Birthday;
         user.Height = updateUserModel.Height ?? user.Height;
-        user.Weight = updateUserModel.Weight ?? user.Weight;
         user.Avatar = updateUserModel.Avatar ?? user.Avatar;
         user.ModificationDate = DateTime.UtcNow;
 
         user.Goal.Type = userGoalType ?? user.Goal.Type;
         user.Goal.Weight = updateUserModel.GoalWeight ?? user.Goal.Weight;
+
+        if (updateUserModel.Weight != null)
+        {
+            var userWeight = new UserWeight.UserWeight
+            {
+                Id = Guid.NewGuid(),
+                User = user,
+                UserId = user.Id,
+                Weight = updateUserModel.Weight ?? 0,
+                CreationDate = DateTime.UtcNow
+            };
+
+            context.UserWeights.Add(userWeight);
+            
+            user.Weights.Add(userWeight);
+        }
         
         await context.SaveChangesAsync();
+        
+        var newUser = await context.Users
+            .Include(u => u.Goal)
+            .ThenInclude(g => g.Type)
+            .Include(u => u.Diets.OrderByDescending(d => d.CreationDate))
+            .ThenInclude(d => d.Product)
+            .Include(u => u.WaterDiets.OrderByDescending(d => d.CreationDate))
+            .Include(u => u.Products.OrderByDescending(p => p.CreationDate))
+            .Include(u => u.Weights.OrderBy(w => w.CreationDate))
+            .Include(u => u.Achievements)
+            .FirstOrDefaultAsync(u => u.Id.Equals(Guid.Parse(userId)));
 
-        return Ok(user);
+        return Ok(newUser);
     }
 
     [Authorize]
@@ -136,10 +165,12 @@ public class UserController(AppDbContext context) : ControllerBase
         var user = await context.Users
             .Include(u => u.Goal)
             .ThenInclude(g => g.Type)
-            .Include(u => u.Diets)
+            .Include(u => u.Diets.OrderByDescending(d => d.CreationDate))
             .ThenInclude(d => d.Product)
-            .Include(u => u.WaterDiets)
-            .Include(u => u.Products)
+            .Include(u => u.WaterDiets.OrderByDescending(d => d.CreationDate))
+            .Include(u => u.Products.OrderByDescending(p => p.CreationDate))
+            .Include(u => u.Weights.OrderBy(w => w.CreationDate))
+            .Include(u => u.Achievements.OrderByDescending(a => a.CreationDate))
             .FirstOrDefaultAsync(u => u.Id.Equals(Guid.Parse(userId)));
 
         if (user == null)
@@ -164,5 +195,54 @@ public class UserController(AppDbContext context) : ControllerBase
             nameof(GetUserProductById),
             new { id = user.Id },
             user);
+    }
+
+    [HttpPatch("Achievement/{symbol}")]
+    [Authorize]
+    public async Task<IActionResult> AddUserAchievement(string symbol)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await context.Users
+            .Include(u => u.Goal)
+            .ThenInclude(g => g.Type)
+            .Include(u => u.Diets.OrderByDescending(d => d.CreationDate))
+            .ThenInclude(d => d.Product)
+            .Include(u => u.WaterDiets.OrderByDescending(d => d.CreationDate))
+            .Include(u => u.Products.OrderByDescending(p => p.CreationDate))
+            .Include(u => u.Weights.OrderBy(w => w.CreationDate))
+            .Include(u => u.Achievements.OrderByDescending(a => a.CreationDate))
+            .FirstOrDefaultAsync(u => u.Id.Equals(Guid.Parse(userId)));
+
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        
+        var achievement = await context.Achievements.FirstOrDefaultAsync(a => a.Symbol.Equals(symbol));
+
+        if (achievement == null)
+        {
+            return NotFound(new { Message = $"Достижение '{symbol}' не найдено" });
+        }
+
+        var ex = user.Achievements.FirstOrDefault(a => a.Symbol.Equals(achievement.Symbol));
+
+        Console.WriteLine(ex);
+        
+        if (ex != null)
+        {
+            return NoContent();
+        }
+        
+        user.Achievements.Add(achievement);
+        await context.SaveChangesAsync();
+
+        return Ok(user);
     }
 }
